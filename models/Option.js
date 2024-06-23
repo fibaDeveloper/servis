@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const OptionSchema = new mongoose.Schema({
@@ -26,6 +25,11 @@ const OptionSchema = new mongoose.Schema({
   currentPrice: {
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'expired'],
+    default: 'pending',
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

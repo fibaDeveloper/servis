@@ -20,11 +20,70 @@ exports.getOptions = async (req, res) => {
   }
 };
 
+// Kullanıcının belirli bir opsiyonunu getirme
+exports.getOptionById = async (req, res) => {
+  const { optionId } = req.params;
+  try {
+    const option = await Option.findOne({ _id: optionId, user: req.user.userId });
+    if (!option) {
+      return res.status(404).json({ message: 'Option not found' });
+    }
+    res.json(option);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Kullanıcının tüm opsiyonlarının kar/zarar durumlarını getirme
 exports.getOptionProfitLoss = async (req, res) => {
   try {
     const profitLoss = await calculateProfitLoss(req.user.userId);
     res.json(profitLoss);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Opsiyonun durumunu güncelleme (Örneğin: Aktifleştirme)
+exports.updateOptionStatus = async (req, res) => {
+  const { optionId } = req.params;
+  const { status } = req.body;
+  try {
+    const option = await Option.findById(optionId);
+    if (!option) {
+      return res.status(404).json({ message: 'Option not found' });
+    }
+    option.status = status;
+    await option.save();
+    res.json(option);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Opsiyonun güncellenmesi
+exports.updateOption = async (req, res) => {
+  const { optionId } = req.params;
+  try {
+    const option = await Option.findByIdAndUpdate(optionId, req.body, { new: true });
+    if (!option) {
+      return res.status(404).json({ message: 'Option not found' });
+    }
+    res.json(option);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Opsiyonun silinmesi
+exports.deleteOption = async (req, res) => {
+  const { optionId } = req.params;
+  try {
+    const option = await Option.findByIdAndDelete(optionId);
+    if (!option) {
+      return res.status(404).json({ message: 'Option not found' });
+    }
+    res.json({ message: 'Option deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
