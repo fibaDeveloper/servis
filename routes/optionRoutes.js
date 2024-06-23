@@ -1,27 +1,22 @@
+// routes/options.js
+
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../utils/authMiddleware'); // Doğru middleware yolu olduğundan emin olun
 const optionController = require('../controllers/optionController');
 
-// Yeni opsiyon oluşturma
-router.post('/', authMiddleware, optionController.createOption);
+// GET all options
+router.get('/', optionController.listOptions);
 
-// Kullanıcının tüm opsiyonlarını getirme
-router.get('/', authMiddleware, optionController.getOptions);
+// GET a single option
+router.get('/:id', optionController.getOption);
 
-// Belirli bir opsiyonun detaylarını getirme
-router.get('/:optionId', authMiddleware, optionController.getOptionById);
+// POST create a new option
+router.post('/', optionController.createOption);
 
-// Kullanıcının tüm opsiyonlarının kar/zarar durumlarını getirme
-router.get('/profit-loss', authMiddleware, optionController.getOptionProfitLoss);
+// PUT update an option
+router.put('/:id', optionController.updateOption);
 
-// Opsiyonun durumunu güncelleme
-router.put('/:optionId/update-status', authMiddleware, optionController.updateOptionStatus);
-
-// Opsiyonun güncellenmesi
-router.put('/:optionId', authMiddleware, optionController.updateOption);
-
-// Opsiyonun silinmesi
-router.delete('/:optionId', authMiddleware, optionController.deleteOption);
+// DELETE delete an option
+router.delete('/:id', optionController.deleteOption);
 
 module.exports = router;

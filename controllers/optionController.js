@@ -1,119 +1,85 @@
-const Option = require('../models/Option');
+// controllers/optionController.js
 
-// Yeni opsiyon oluşturma
+const Option = require('../models/Options');
+
+// List all options
+exports.listOptions = async (req, res) => {
+    try {
+        const options = await Option.find();
+        res.json(options);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// Get single option
+exports.getOption = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const option = await Option.findById(id);
+        if (!option) {
+            return res.status(404).json({ message: 'Option not found' });
+        }
+        res.json(option);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// Create a new option
 exports.createOption = async (req, res) => {
-  try {
-    const option = await createOption(req.body, req.user.userId);
-    res.status(201).json(option);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Kullanıcının tüm opsiyonlarını getirme
-exports.getOptions = async (req, res) => {
-  try {
-    const options = await getOptionsByUser(req.user.userId);
-    res.json(options);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Kullanıcının belirli bir opsiyonunu getirme
-exports.getOptionById = async (req, res) => {
-  const { optionId } = req.params;
-  try {
-    const option = await Option.findOne({ _id: optionId, user: req.user.userId });
-    if (!option) {
-      return res.status(404).json({ message: 'Option not found' });
+    const { type, underlyingAsset, strikePrice, expiryDate, premium, createdBy, status } = req.body;
+    try {
+        const newOption = new Option({
+            type,
+            underlyingAsset,
+            strikePrice,
+            expiryDate,
+            premium,
+            createdBy,
+            status
+        });
+        const savedOption = await newOption.save();
+        res.status(201).json(savedOption);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-    res.json(option);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 };
 
-// Kullanıcının tüm opsiyonlarının kar/zarar durumlarını getirme
-exports.getOptionProfitLoss = async (req, res) => {
-  try {
-    const profitLoss = await calculateProfitLoss(req.user.userId);
-    res.json(profitLoss);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Opsiyonun durumunu güncelleme (Örneğin: Aktifleştirme)
-exports.updateOptionStatus = async (req, res) => {
-  const { optionId } = req.params;
-  const { status } = req.body;
-  try {
-    const option = await Option.findById(optionId);
-    if (!option) {
-      return res.status(404).json({ message: 'Option not found' });
-    }
-    option.status = status;
-    await option.save();
-    res.json(option);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Opsiyonun güncellenmesi
+// Update an option
 exports.updateOption = async (req, res) => {
-  const { optionId } = req.params;
-  try {
-    const option = await Option.findByIdAndUpdate(optionId, req.body, { new: true });
-    if (!option) {
-      return res.status(404).json({ message: 'Option not found' });
+    const id = req.params.id;
+    const { type, underlyingAsset, strikePrice, expiryDate, premium, createdBy, status } = req.body;
+    try {
+        const updatedOption = await Option.findByIdAndUpdate(id, {
+            type,
+            underlyingAsset,
+            strikePrice,
+            expiryDate,
+            premium,
+            createdBy,
+            status,
+            updatedAt: Date.now()
+        }, { new: true });
+        if (!updatedOption) {
+            return res.status(404).json({ message: 'Option not found' });
+        }
+        res.json(updatedOption);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-    res.json(option);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 };
 
-// Opsiyonun silinmesi
+// Delete an option
 exports.deleteOption = async (req, res) => {
-  const { optionId } = req.params;
-  try {
-    const option = await Option.findByIdAndDelete(optionId);
-    if (!option) {
-      return res.status(404).json({ message: 'Option not found' });
+    const id = req.params.id;
+    try {
+        const deletedOption = await Option.findByIdAndDelete(id);
+        if (!deletedOption) {
+            return res.status(404).json({ message: 'Option not found' });
+        }
+        res.json({ message: 'Option deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-    res.json({ message: 'Option deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Yeni opsiyon oluşturma işlevi
-const createOption = async (optionData, userId) => {
-  const { type, product, purchaseDate, expiryDate, strikePrice, currentPrice } = optionData;
-  const option = new Option({
-    type,
-    product,
-    purchaseDate,
-    expiryDate,
-    strikePrice,
-    currentPrice,
-    user: userId,
-  });
-  return await option.save();
-};
-
-// Kullanıcının tüm opsiyonlarını getirme işlevi
-const getOptionsByUser = async (userId) => {
-  return await Option.find({ user: userId });
-};
-
-// Kullanıcının tüm opsiyonlarının kar/zarar durumlarını hesaplama işlevi
-const calculateProfitLoss = async (userId) => {
-  const options = await getOptionsByUser(userId);
-  return options.map(option => ({
-    ...option._doc,
-    profitLoss: option.type === 'call' ? Math.max(0, option.currentPrice - option.strikePrice) : Math.max(0, option.strikePrice - option.currentPrice),
-  }));
 };

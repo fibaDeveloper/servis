@@ -1,19 +1,21 @@
-// app.js
 const express = require('express');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const optionRoutes = require('./routes/optionRoutes');
+const transactionRoutes = require('./routes/transactions');
 const dotenv = require('dotenv');
-
+const cors = require('cors'); 
 
 dotenv.config();
 
 const app = express();
 
-
 connectDB();
 
 app.use(express.json());
+
+// Enable CORS with default settings
+app.use(cors());
 
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
@@ -32,6 +34,7 @@ app.use((req, res, next) => {
 // Rotalar
 app.use('/api/auth', authRoutes);
 app.use('/api/options', optionRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 const PORT = process.env.PORT || 5000;
 
