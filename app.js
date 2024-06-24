@@ -1,8 +1,8 @@
 const express = require('express');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
-const optionRoutes = require('./routes/optionRoutes');
-const transactionRoutes = require('./routes/transactions');
+const optionRoutes = require('./routes/optionRoutes'); // Option routes dosyasını doğru import edin
+const transactionRoutes = require('./routes/transactions'); // Transaction routes dosyasını doğru import edin
 const dotenv = require('dotenv');
 const cors = require('cors'); 
 

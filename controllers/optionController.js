@@ -28,7 +28,7 @@ exports.getOption = async (req, res) => {
 
 // Create a new option
 exports.createOption = async (req, res) => {
-    const { type, underlyingAsset, strikePrice, expiryDate, premium, createdBy, status } = req.body;
+    const { type, underlyingAsset, strikePrice, expiryDate, premium, status } = req.body;
     try {
         const newOption = new Option({
             type,
@@ -36,7 +36,7 @@ exports.createOption = async (req, res) => {
             strikePrice,
             expiryDate,
             premium,
-            createdBy,
+            createdBy: req.user.userId, // JWT'den gelen kullanıcı bilgisi
             status
         });
         const savedOption = await newOption.save();
@@ -49,7 +49,7 @@ exports.createOption = async (req, res) => {
 // Update an option
 exports.updateOption = async (req, res) => {
     const id = req.params.id;
-    const { type, underlyingAsset, strikePrice, expiryDate, premium, createdBy, status } = req.body;
+    const { type, underlyingAsset, strikePrice, expiryDate, premium, status } = req.body;
     try {
         const updatedOption = await Option.findByIdAndUpdate(id, {
             type,
@@ -57,7 +57,7 @@ exports.updateOption = async (req, res) => {
             strikePrice,
             expiryDate,
             premium,
-            createdBy,
+            createdBy: req.user.userId, // JWT'den gelen kullanıcı bilgisi
             status,
             updatedAt: Date.now()
         }, { new: true });
